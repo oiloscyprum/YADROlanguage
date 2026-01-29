@@ -3,7 +3,7 @@
 ## Metadata
 - **YUP ID:** 26.1.2
 - **Title:** Yadro User Project Package Index (YUPPI) Specification
-- **Author:** CyrOil Language Development Team
+- **Author:** CyrOil 
 - **Status:** Proposed
 - **Created:** 2026-01-27
 - **Governs:** YADRO Language Specification v0.2.0+
@@ -384,3 +384,4 @@ The reference implementation consists of:
 
 ---
 *This YUP document formalizes the YUPPI system as the official package management solution for YADRO, ensuring a consistent, secure, and efficient ecosystem for language development and distribution.*
+
