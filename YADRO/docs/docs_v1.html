@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YADRO - Your Architecture's Definitive Runtime Optimizer</title>
+    <style>
+        :root {
+            --primary: #2d3748;
+            --secondary: #4a5568;
+            --accent: #3182ce;
+            --accent-dark: #2b6cb0;
+            --light: #f7fafc;
+            --dark: #1a202c;
+            --success: #48bb78;
+            --warning: #ecc94b;
+            --danger: #f56565;
+            --code-bg: #2d3748;
+            --code-text: #cbd5e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--dark);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--secondary);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        .cta-button {
+            background: var(--accent);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .cta-button:hover {
+            background: var(--accent-dark);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .secondary-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .secondary-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Main Content */
+        .content {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin: -50px 20px 60px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        section {
+            margin-bottom: 80px;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            color: var(--secondary);
+            margin: 30px 0 20px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            padding: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card h4 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+
+        .code-comment {
+            color: #a0aec0;
+        }
+
+        .code-keyword {
+            color: #63b3ed;
+        }
+
+        .code-function {
+            color: #9f7aea;
+        }
+
+        .code-string {
+            color: #68d391;
+        }
+
+        /* Pillars */
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .pillar {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .pillar h4 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+
+        /* YUPPI Section */
+        .yuppi-section {
+            background: linear-gradient(135deg, #4299e1 0%, #667eea 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+
+        .yuppi-section h3 {
+            color: white;
+        }
+
+        .cli-example {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+        }
+
+        /* Constitution */
+        .constitution {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+
+        .constitution h3 {
+            color: white;
+        }
+
+        .articles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .article {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .article h4 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #63b3ed;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #cbd5e0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #4a5568;
+            color: #a0aec0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+            }
+
+            .content {
+                padding: 40px 20px;
+                margin: -30px 10px 40px;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">YADRO<span>.</span></a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#pillars">Pillars</a>
+                    <a href="#yuppi">YUPPI</a>
+                    <a href="#constitution">Constitution</a>
+                    <a href="#examples">Examples</a>
+                </div>
+                <a href="#" class="cta-button">Get Started</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Your Architecture's Definitive Runtime Optimizer</h1>
+            <p>A language for operating systems development and low-level programming with high-level syntax, static safety, and zero-cost abstractions.</p>
+            <div class="hero-buttons">
+                <a href="#" class="cta-button">Download v0.2.0</a>
+                <a href="#" class="secondary-button">View Documentation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content">
+            <!-- Overview -->
+            <section id="overview">
+                <h2>Overview</h2>
+                <p><strong>YADRO</strong> (Your Architecture's Definitive Runtime Optimizer) is a systems programming language designed for operating system development and low-level programming. Created by the CyrOil team, YADRO combines the safety guarantees of modern languages with the performance and control of low-level systems programming.</p>
+                
+                <p>Version: <strong>0.2.0 alpha</strong> | Date: <strong>January 29, 2026</strong></p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h4>🛡️ Static Safety</h4>
+                        <p>Compile-time verification ensures memory safety and correctness without runtime overhead.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>⚡ Zero-Cost Abstractions</h4>
+                        <p>High-level constructs generate machine code as efficient as hand-written assembly.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔄 Dual Memory Model</h4>
+                        <p>Static ownership for performance, managed heap (<code>gc</code>) for convenience.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Core Philosophy -->
+            <section id="philosophy">
+                <h2>Core Philosophy & Memory Model</h2>
+                
+                <h3>Dual-Level Memory Model</h3>
+                <p>YADRO employs a sophisticated memory management approach:</p>
+                <ul style="margin-left: 30px; margin-bottom: 20px;">
+                    <li><strong>Static Ownership:</strong> All types are unique by default. Assignment moves ownership.</li>
+                    <li><strong>Borrowing:</strong> Access via immutable (<code>&T</code>) or mutable (<code>&mut T</code>) references with compile-time lifetime checking.</li>
+                    <li><strong>Managed Heap:</strong> The <code>gc&lt;T&gt;</code> type provides reference-counted pointers for dynamic lifetimes.</li>
+                    <li><strong>Explicit Copying:</strong> Only <code>#Copy</code> types can be copied implicitly.</li>
+                </ul>
+
+                <h3>Key Principles</h3>
+                <div class="code-block">
+<span class="code-comment">// Ownership - moves by default</span>
+<span class="code-keyword">int</span> x = <span class="code-function">10</span>
+<span class="code-keyword">int</span> y = x  <span class="code-comment">// x is moved, no longer accessible</span>
+
+<span class="code-comment">// Borrowing - references with lifetimes</span>
+<span class="code-keyword">&int</span> ref = &x
+<span class="code-keyword">&mut int</span> mut_ref = &<span class="code-keyword">mut</span> x
+
+<span class="code-comment">// Managed heap for complex ownership</span>
+<span class="code-keyword">gc</span>[<span class="code-keyword">string</span>] s = <span class="code-keyword">gc</span>[<span class="code-keyword">string</span>](<span class="code-string">"Hello, YADRO!"</span>)
+
+<span class="code-comment">// Immediate destruction</span>
+<span class="code-keyword">del</span> x
+</div>
+            </section>
+
+            <!-- Technical Pillars -->
+            <section id="pillars">
+                <h2>The Four Technical Pillars</h2>
+                <p>YADRO's design is built upon four foundational pillars that ensure safety, performance, and correctness:</p>
+                
+                <div class="pillars">
+                    <div class="pillar">
+                        <h4>Pillar 1</h4>
+                        <p><strong>Ownership & Borrowing</strong><br>Memory safety guaranteed by static single ownership with checked, scoped references.</p>
+                    </div>
+                    <div class="pillar">
+                        <h4>Pillar 2</h4>
+                        <p><strong>Protocol-Based Polymorphism</strong><br>Generics constrained by explicit, compile-time-checked protocols for zero-cost abstraction.</p>
+                    </div>
+                    <div class="pillar">
+                        <h4>Pillar 3</h4>
+                        <p><strong>Algebraic Effects for Errors</strong><br>Failure modeled using <code>Result[T, E]</code> type. Exceptions are banned.</p>
+                    </div>
+                    <div class="pillar">
+                        <h4>Pillar 4</h4>
+                        <p><strong>Region-Based Resource Management</strong><br><code>arena</code> construct provides deterministic, fast lifetime management.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Code Examples -->
+            <section id="examples">
+                <h2>Code Examples</h2>
+                
+                <h3>Error Handling with Result</h3>
+                <div class="code-block">
+<span class="code-comment">// Function that may fail</span>
+<span class="code-keyword">fun</span> read_file(<span class="code-keyword">string</span> path) -> <span class="code-keyword">Result</span>[<span class="code-keyword">string</span>, IOError]:
+    <span class="code-keyword">if</span> !file_exists(path):
+        <span class="code-keyword">return</span> <span class="code-function">Err</span>(IOError(<span class="code-string">"Not found"</span>))
+    <span class="code-keyword">return</span> <span class="code-function">Ok</span>(file_content)
+
+<span class="code-comment">// Concise propagation with ? operator</span>
+<span class="code-keyword">fun</span> process() -> <span class="code-keyword">Result</span>[<span class="code-keyword">int</span>, IOError]:
+    <span class="code-keyword">string</span> data = read_file(<span class="code-string">"data.bin"</span>)?  <span class="code-comment">// Early return on Err</span>
+    <span class="code-keyword">int</span> num = parse_binary(data)?
+    <span class="code-keyword">return</span> <span class="code-function">Ok</span>(num)
+</div>
+
+                <h3>Classes & Traits</h3>
+                <div class="code-block">
+<span class="code-comment">// Linear class (owns resources)</span>
+<span class="code-keyword">class</span>[<span class="code-keyword">linear</span>] File:
+    <span class="code-keyword">int</span> descriptor
+    <span class="code-keyword">sfun</span> drop(&<span class="code-keyword">mut</span> self):
+        os::close(self.descriptor)
+
+<span class="code-comment">// Trait definition</span>
+<span class="code-keyword">trait</span> Stringifiable:
+    <span class="code-keyword">fun</span> to_string(&self) -> <span class="code-keyword">string</span>
+
+<span class="code-comment">// Generic function with trait bounds</span>
+<span class="code-keyword">temp</span>[Type] <span class="code-keyword">fun</span> print_all(<span class="code-keyword">array</span>[Type] items) <span class="code-keyword">where</span> Type: Stringifiable:
+    <span class="code-keyword">for</span> item <span class="code-keyword">in</span> items:
+        cli.print(item.to_string())
+</div>
+
+                <h3>Unsafe Blocks & Inline Assembly</h3>
+                <div class="code-block">
+<span class="code-keyword">#[unsafe]</span>
+<span class="code-keyword">fun</span> port_in(<span class="code-keyword">u16</span> port) -> <span class="code-keyword">u8</span>:
+    <span class="code-keyword">u8</span> result
+    <span class="code-keyword">asm</span>(<span class="code-string">"in %dx, %al"</span>):
+        output(<span class="code-string">"al"</span>) result
+        input(<span class="code-string">"dx"</span>) port
+    <span class="code-keyword">return</span> result
+</div>
+            </section>
+
+            <!-- YUPPI Section -->
+            <section id="yuppi" class="yuppi-section">
+                <h2>YUPPI - Yadro User Project Package Index</h2>
+                <p>YUPPI is the official package manager and distribution system for YADRO modules, libraries, and tools. It provides dependency resolution, version management, security verification, and seamless ecosystem integration.</p>
+                
+                <h3>Key Features</h3>
+                <ul style="margin-left: 30px; margin-bottom: 25px;">
+                    <li>Automatic dependency resolution</li>
+                    <li>Semantic versioning with compatibility checking</li>
+                    <li>Cryptographic verification of package integrity</li>
+                    <li>Cross-platform consistent package format</li>
+                    <li>Seamless integration with YADRO compiler toolchain</li>
+                </ul>
+
+                <h3>Command Line Interface</h3>
+                <div class="cli-example">
+yadro yuppi install &lt;package&gt;              # Install package<br>
+yadro yuppi install network-lib --features ssl,compression<br>
+yadro yuppi add &lt;package&gt;                   # Add to dependencies<br>
+yadro yuppi build                           # Build current package<br>
+yadro yuppi publish                         # Publish to registry<br>
+yadro yuppi search &lt;query&gt;                  # Search packages
+                </div>
+
+                <h3>Package Structure</h3>
+                <div class="code-block" style="background: rgba(0,0,0,0.3); margin-top: 15px;">
+package-name.ymd/<br>
+├── main.toml                 # Package manifest<br>
+├── setup.yad                 # Build script<br>
+├── checksum.sha256           # Integrity verification<br>
+├── src/<br>
+│   ├── main.yad<br>
+│   └── module.yad<br>
+├── bin/                      # Pre-compiled binaries<br>
+└── docs/                     # Documentation
+                </div>
+            </section>
+
+            <!-- Constitution -->
+            <section id="constitution" class="constitution">
+                <h2>The YADRO Constitution</h2>
+                <p>The Constitution establishes the foundational, immutable principles of the YADRO programming language. It serves as the supreme authority for all design decisions and evolution of the language.</p>
+                
+                <div class="articles">
+                    <div class="article">
+                        <h4>Article I: Primacy of Static Verification</h4>
+                        <p>The correctness and safety of a program must be provable at compile time. The compiler is a verification engine, not just a translator.</p>
+                    </div>
+                    <div class="article">
+                        <h4>Article II: Principle of Explicit Intent</h4>
+                        <p>Code must unambiguously express programmer intent. No magic, no hidden control flow. Cost must be apparent from syntax.</p>
+                    </div>
+                    <div class="article">
+                        <h4>Article III: Zero-Cost Abstraction</h4>
+                        <p>Programmers can descend from high-level abstractions to low-level operations without losing performance or control.</p>
+                    </div>
+                    <div class="article">
+                        <h4>Article IV: Determinism & Composability</h4>
+                        <p>System behavior must be predictable. Unmanaged global mutable state is prohibited. Side-effects are part of the type.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Standard Library -->
+            <section id="stdlib">
+                <h2>Standard Library Structure</h2>
+                <p>YADRO's standard library is minimal, idiomatic, and demonstrates correct YADRO style:</p>
+                
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h4><code>std::core</code></h4>
+                        <p>Core types, traits, intrinsics</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><code>std::alloc</code></h4>
+                        <p>Memory allocators (global, arena)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><code>std::collections</code></h4>
+                        <p>Data structures (vector, map, set)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><code>std::os</code></h4>
+                        <p>OS interaction (fs, process, bios)</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><code>std::async</code></h4>
+                        <p>Async/await, actors, channels</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4><code>std::libc_safe</code></h4>
+                        <p>Safe bindings to libc</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Get Started -->
+            <section id="get-started">
+                <h2>Get Started with YADRO</h2>
+                <p>Ready to dive in? Here's how to get started with YADRO development:</p>
+                
+                <ol style="margin-left: 30px; margin-bottom: 30px; font-size: 1.1rem;">
+                    <li><strong>Install YADRO:</strong> Download the compiler for your platform</li>
+                    <li><strong>Initialize a project:</strong> <code>yadro yuppi init my-project</code></li>
+                    <li><strong>Write your code:</strong> Create <code>src/main.yad</code></li>
+                    <li><strong>Build:</strong> <code>yadro yuppi build</code></li>
+                    <li><strong>Run:</strong> Execute your compiled binary</li>
+                </ol>
+
+                <div class="code-block">
+<span class="code-comment">// Hello World in YADRO</span>
+<span class="code-keyword">#import</span>
+std::core::cli
+
+<span class="code-keyword">#start</span>
+<span class="code-keyword">fun</span> main() -> <span class="code-keyword">int</span>:
+    cli.print(<span class="code-string">"Hello, YADRO!"</span>)
+    <span class="code-keyword">return</span> <span class="code-function">0</span>
+<span class="code-keyword">#end</span>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>YADRO</h3>
+                    <p>Your Architecture's Definitive Runtime Optimizer - A language for systems programming with safety, performance, and zero-cost abstractions.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Language Specification</a></li>
+                        <li><a href="#">YUPPI Registry</a></li>
+                        <li><a href="#">GitHub Repository</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Community Forum</a></li>
+                        <li><a href="#">Issue Tracker</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Governance</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">YUP Process</a></li>
+                        <li><a href="#">Constitution</a></li>
+                        <li><a href="#">Architecture Council</a></li>
+                        <li><a href="#">Contribute</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2026 CyrOil Language Development Team. YADRO is governed by YUP 26.1.1, YUP 26.1.2, and YUP 26.1.3.</p>
+                <p>The Compiler is the Guardian of the Constitution.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
