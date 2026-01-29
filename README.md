@@ -1,4 +1,4 @@
-# YADRO Language Specification (Revised)
+# YADRO Language Specification
 ## Overview
 YADRO (Your Architecture's Definitive Runtime Optimizer)
  made by CyrOil
