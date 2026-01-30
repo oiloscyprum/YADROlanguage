@@ -1,10 +1,10 @@
-#==========================================#
-#  ==     =====   ==  ==   =====   ====    #
-#  ==     =        ====    =       =  ==   #
-#  ==     =====     ==     =====   = ==    #
-#  ==     =        ====    =       =  ==   #
-#  =====  =====   ==  ==   =====   =   ==  #
-#==========================================#
+#================================================#
+#  YY   YY    AAA      DDDDD    RRRR     OOOO    #
+#   YY YY    AA AA     DD  DD   R  RR   OO  OO   #
+#    YYY    AA   AA    DD   DD  R RR    OO  OO   #
+#     Y    AAAAAAAAA   DD  DD   R  RR   OO  OO   #
+#     Y   AA       AA  DDDDD    R   RR   OOOO    #
+#================================================#
 
 #  Lexer module for YADRO compiler   
 
@@ -14,7 +14,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import List, Optional, Union
-#Tokens [a lot of vars to be eaten by Lexer]
+
 class TokenType(Enum):
     DIRECTIVE_TARGET = "#target"
     DIRECTIVE_PLUGIN = "#plugin"
@@ -42,6 +42,7 @@ class TokenType(Enum):
     KEYWORD_IMPL = "impl"
     KEYWORD_TRAIT = "trait"
     KEYWORD_WHERE = "where"
+    KEYWORD_MUT = "mut"
     MODIFIER_ASYNC = "[async]"
     MODIFIER_THREAD = "[thread]"
     MODIFIER_CONST = "[const]"
@@ -84,8 +85,7 @@ class TokenType(Enum):
     OP_ASSIGN_MUL = "*="
     OP_ASSIGN_DIV = "/="
     OP_ASSIGN_MOD = "%="
-    OP_ASSIGN_POW = "^="
-    OP_ASSIGN_FDIV = "\\="
+    OP_ASSIGN_POW = "**="
     OP_ASSIGN_BIT_OR = "|="
     OP_ASSIGN_BIT_AND = "&="
     OP_ASSIGN_BIT_XOR = "^="
@@ -108,10 +108,9 @@ class TokenType(Enum):
     OP_SUB = "-"
     OP_MUL = "*"
     OP_DIV = "/"
-    OP_FDIV = "|"  
+    OP_FDIV = "//"
     OP_MOD = "%"
-    OP_POW = "^"
-    OP_ABS_START = "|a|" 
+    OP_POW = "**"
     OP_BIT_AND = "&"
     OP_BIT_OR = "|"
     OP_BIT_XOR = "^"
@@ -124,7 +123,6 @@ class TokenType(Enum):
     OP_LOGICAL_NAND = "nand"
     OP_LOGICAL_ANY = "any"
     OP_LOGICAL_ALL = "all"
-    OP_IMPLICATION = "->"
     OP_DEREF = "*"
     OP_LENGTH = "#"
     LITERAL_INT = "INT"
@@ -148,13 +146,15 @@ class TokenType(Enum):
     RBRACE = "}"
     LBRACKET = "["
     RBRACKET = "]"
+    LT = "<"
+    GT = ">"
     NEWLINE = "NEWLINE"
     INDENT = "INDENT"
     DEDENT = "DEDENT"
     COMMENT_LINE = "//"
-    COMMENT_BLOCK = "/* */"
+    COMMENT_BLOCK = "/*"
     EOF = "EOF"
-#Nice token info
+
 @dataclass(frozen=True)
 class Token:
     type: TokenType
@@ -162,17 +162,18 @@ class Token:
     line: int
     column: int
     value: Optional[Union[int, float, str, bool]] = None
+
     def __str__(self):
         loc = f"{self.line}:{self.column}"
         val = f" val={self.value}" if self.value is not None else ""
         return f"Token({self.type.name:25} '{self.lexeme:25}' @ {loc}{val})"
-#LexerError - is my impression of pessimist
+
 class LexerError(Exception):
     def __init__(self, message: str, line: int, column: int):
         super().__init__(f"[Line {line}:{column}] {message}")
         self.line = line
         self.column = column
-# Oh here we go again <Lexer is great guy gives tokens to lexems>
+
 class YadroLexer:
     KEYWORDS = {
         "fun": TokenType.KEYWORD_FUN,
@@ -194,6 +195,7 @@ class YadroLexer:
         "impl": TokenType.KEYWORD_IMPL,
         "trait": TokenType.KEYWORD_TRAIT,
         "where": TokenType.KEYWORD_WHERE,
+        "mut": TokenType.KEYWORD_MUT,
         "int": TokenType.TYPE_INT,
         "float": TokenType.TYPE_FLOAT,
         "bool": TokenType.TYPE_BOOL,
@@ -220,6 +222,7 @@ class YadroLexer:
         "any": TokenType.OP_LOGICAL_ANY,
         "all": TokenType.OP_LOGICAL_ALL,
     }
+
     MODIFIERS = {
         "[async]": TokenType.MODIFIER_ASYNC,
         "[thread]": TokenType.MODIFIER_THREAD,
@@ -232,6 +235,7 @@ class YadroLexer:
         "[module]": TokenType.MODIFIER_MODULE,
         "[actor]": TokenType.MODIFIER_ACTOR,
     }
+
     DIRECTIVES = {
         "#target": TokenType.DIRECTIVE_TARGET,
         "#plugin": TokenType.DIRECTIVE_PLUGIN,
@@ -241,8 +245,8 @@ class YadroLexer:
         "#start": TokenType.DIRECTIVE_START,
         "#end": TokenType.DIRECTIVE_END,
     }
-    # clear it all
-    def __init__(self, source: str, filename: str = "<input>"):
+
+    def __init__(self, source: str, filename: str = ""):
         self.source = source
         self.filename = filename
         self.tokens: List[Token] = []
@@ -251,7 +255,7 @@ class YadroLexer:
         self.line = 1
         self.column = 1
         self.indent_stack = [0]
-    # Ill give tokens for my fellow lexems
+
     def tokenize(self) -> List[Token]:
         try:
             while not self.is_at_end():
@@ -261,13 +265,11 @@ class YadroLexer:
             while len(self.indent_stack) > 1:
                 self.add_token(TokenType.DEDENT)
                 self.indent_stack.pop()
-            
             self.add_token(TokenType.EOF)
             return self.tokens
         except LexerError as e:
-            print(f"LEXICAL ERROR ({self.filename}): {e}")
             raise
-    
+
     def scan_token(self):
         c = self.advance()
         if c == ' ' or c == '\r':
@@ -279,8 +281,7 @@ class YadroLexer:
             self.scan_indentation()
             return
         elif c == '\t':
-            raise LexerError("Tabs forbidden: use spaces for explicit indentation cost", 
-                           self.line, self.column)
+            raise LexerError("Tabs forbidden: use spaces for explicit indentation cost", self.line, self.column)
         elif c == '/' and self.match('/'):
             self.scan_line_comment()
             return
@@ -288,7 +289,12 @@ class YadroLexer:
             self.scan_block_comment()
             return
         elif c == '#':
-            self.scan_directive()
+            if self.match('[') and self.match('unsafe') and self.match(']'):
+                self.add_token(TokenType.MODIFIER_UNSAFE)
+            else:
+                self.current -= 1
+                self.column -= 1
+                self.scan_directive()
             return
         elif c == '"' or c == "'":
             self.scan_string(c)
@@ -302,147 +308,108 @@ class YadroLexer:
         elif c == '>':
             if self.match('>'):
                 if self.match('>'):
-                    self.add_token(TokenType.OP_PIPELINE_FWD)  # >>>
+                    self.add_token(TokenType.OP_PIPELINE_FWD)
                 else:
-                    self.add_token(TokenType.OP_RSHIFT)  # >>
+                    self.add_token(TokenType.OP_RSHIFT)
             elif self.match('='):
-                self.add_token(TokenType.OP_GTE)  # >=
+                self.add_token(TokenType.OP_GTE)
             else:
-                self.add_token(TokenType.OP_GT)  # >
-                
+                self.add_token(TokenType.OP_GT)
         elif c == '<':
             if self.match('<'):
                 if self.match('<'):
-                    self.add_token(TokenType.OP_PIPELINE_BWD)  # <<<
+                    self.add_token(TokenType.OP_PIPELINE_BWD)
                 else:
-                    self.add_token(TokenType.OP_LSHIFT)  # <<
+                    self.add_token(TokenType.OP_LSHIFT)
             elif self.match('='):
-                self.add_token(TokenType.OP_LTE)  # <=
+                self.add_token(TokenType.OP_LTE)
             else:
-                self.add_token(TokenType.OP_LT)  # <
-                
+                self.add_token(TokenType.OP_LT)
         elif c == '=':
             if self.match('>'):
                 if self.match('='):
-                    self.add_token(TokenType.OP_ASSIGN_IF_GTE)  # =>=
+                    self.add_token(TokenType.OP_ASSIGN_IF_GTE)
                 else:
-                    self.add_token(TokenType.OP_ASSIGN_IF_GT)  # =>
+                    self.add_token(TokenType.OP_ASSIGN_IF_GT)
             elif self.match('<'):
                 if self.match('='):
-                    self.add_token(TokenType.OP_ASSIGN_IF_LTE)  # =<=
+                    self.add_token(TokenType.OP_ASSIGN_IF_LTE)
                 else:
-                    self.add_token(TokenType.OP_ASSIGN_IF_LT)  # =<
+                    self.add_token(TokenType.OP_ASSIGN_IF_LT)
             elif self.match('='):
-                self.add_token(TokenType.OP_EQ)  # ==
+                self.add_token(TokenType.OP_EQ)
             elif self.match('!'):
                 if self.match('='):
-                    self.add_token(TokenType.OP_ASSIGN_IF_NE)  # =!=
+                    self.add_token(TokenType.OP_ASSIGN_IF_NE)
                 else:
-                    self.add_token(TokenType.OP_NE)  # !=
+                    self.add_token(TokenType.OP_NE)
             else:
-                self.add_token(TokenType.OP_ASSIGN)  # =
-                
+                self.add_token(TokenType.OP_ASSIGN)
         elif c == '!':
             if self.match('='):
                 self.add_token(TokenType.OP_NE)
             else:
                 self.add_token(TokenType.OP_BIT_NOT)
-                
         elif c == '+':
             if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_ADD)
             else:
                 self.add_token(TokenType.OP_ADD)
-                
         elif c == '-':
             if self.match('>'):
-                self.add_token(TokenType.OP_IMPLICATION)
+                self.add_token(TokenType.OP_DEREF)
             elif self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_SUB)
             else:
                 self.add_token(TokenType.OP_SUB)
-                
         elif c == '*':
-            if self.match('='):
+            if self.match('*'):
+                if self.match('='):
+                    self.add_token(TokenType.OP_ASSIGN_POW)
+                else:
+                    self.add_token(TokenType.OP_POW)
+            elif self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_MUL)
             else:
                 self.add_token(TokenType.OP_MUL)
-                
         elif c == '/':
-            if self.match('='):
+            if self.match('/'):
+                self.add_token(TokenType.OP_FDIV)
+            elif self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_DIV)
             else:
                 self.add_token(TokenType.OP_DIV)
-                
         elif c == '%':
             if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_MOD)
             else:
                 self.add_token(TokenType.OP_MOD)
-                
-        elif c == '^':
-            if self.match('='):
-                self.add_token(TokenType.OP_ASSIGN_POW)
-            else:
-                self.add_token(TokenType.OP_POW)
-                
         elif c == '|':
-            if self.match('a') and self.match('|'):
-                self.add_token(TokenType.OP_ABS_START)
-            elif self.match('='):
+            if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_BIT_OR)
             else:
-                self.add_token(TokenType.OP_FDIV)
-                
+                self.add_token(TokenType.OP_BIT_OR)
         elif c == '&':
             if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_BIT_AND)
             else:
                 self.add_token(TokenType.OP_BIT_AND)
-                
         elif c == '~':
             self.add_token(TokenType.PREDICATE_TILDE)
-                
         elif c == '@':
             if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_ADDR)
             else:
-                raise LexerError("'@' alone forbidden: use explicit '&var' for references", 
-                               self.line, self.column)
-                
+                raise LexerError("'@' alone forbidden: use explicit '&var' for references", self.line, self.column)
         elif c == '$':
             if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_SWAP)
             else:
-                raise LexerError("'$' alone forbidden: use '$=' for swap only", 
-                               self.line, self.column)
-
+                raise LexerError("'$' alone forbidden: use '$=' for swap only", self.line, self.column)
         elif c == '[':
-            if self.peek().isalpha():
-                while self.peek().isalnum() or self.peek() == '_':
-                    self.advance()
-                if self.match(']'):
-                    full_mod = self.source[self.start:self.current]
-                    if full_mod in self.MODIFIERS:
-                        self.add_token(self.MODIFIERS[full_mod])
-                        return
-                    else:
-                        self.current = self.start + 1
-                        self.column = self.column - (self.current - (self.start + 1))
-                        self.add_token(TokenType.LBRACKET, "[")
-                        self.scan_identifier()
-                        if self.match(']'):
-                            self.add_token(TokenType.RBRACKET, "]")
-                        else:
-                            raise LexerError(f"Expected ']' after modifier content", 
-                                           self.line, self.column)
-                else:
-                    self.add_token(TokenType.LBRACKET, "[")
-            else:
-                self.add_token(TokenType.LBRACKET, "[")
-                
+            self.add_token(TokenType.LBRACKET)
         elif c == ']':
-            self.add_token(TokenType.RBRACKET, "]")
+            self.add_token(TokenType.RBRACKET)
         elif c == ':':
             if self.match(':'):
                 self.add_token(TokenType.DOUBLE_COLON)
@@ -463,46 +430,29 @@ class YadroLexer:
         elif c == '}':
             self.add_token(TokenType.RBRACE)
         elif c == '#':
-            if self.peek().isalpha():
-                if self.match('[') and self.match('unsafe') and self.match(']'):
-                    self.add_token(TokenType.MODIFIER_UNSAFE)
-                else:
-                    self.add_token(TokenType.OP_LENGTH)
-            else:
-                self.add_token(TokenType.OP_LENGTH)
-            
+            self.add_token(TokenType.OP_LENGTH)
         else:
             raise LexerError(f"Unexpected character: '{c}'", self.line, self.column)
-    
+
     def scan_directive(self):
         while self.peek().isalpha() or self.peek() == '_':
             self.advance()
-        
         directive = self.source[self.start:self.current]
-        
         if directive in self.DIRECTIVES:
             self.add_token(self.DIRECTIVES[directive])
-        elif directive == "#[unsafe":
-            if self.match(']'):
-                self.add_token(TokenType.MODIFIER_UNSAFE)
-            else:
-                raise LexerError("Malformed #[unsafe] directive", self.line, self.column)
         else:
             raise LexerError(f"Unknown directive: {directive}", self.line, self.column)
-    
+
     def scan_identifier(self):
         while self.is_alphanumeric(self.peek()):
             self.advance()
-        
         text = self.source[self.start:self.current]
         token_type = self.KEYWORDS.get(text, TokenType.IDENTIFIER)
         self.add_token(token_type, text)
-    
+
     def scan_number(self):
-        start_col = self.column - 1
         if self.source[self.start] == '0' and self.peek() in ('x', 'X'):
             self.advance()
-            # oh its peek<PEAK>
             if not self.peek_hex():
                 raise LexerError("Invalid hex literal: no digits after 0x", self.line, self.column)
             while self.peek_hex():
@@ -511,7 +461,6 @@ class YadroLexer:
             value = int(text, 16)
             self.add_token(TokenType.LITERAL_HEX, text, value)
             return
-        
         if self.source[self.start] == '0' and self.peek() in ('b', 'B'):
             self.advance()
             if not self.peek_bin():
@@ -546,28 +495,25 @@ class YadroLexer:
             if self.peek() in ('+', '-'):
                 self.advance()
             if not self.peek().isdigit():
-                raise LexerError("Invalid exponential notation: missing digits", 
-                               self.line, self.column)
+                raise LexerError("Invalid exponential notation: missing digits", self.line, self.column)
             while self.peek().isdigit():
                 self.advance()
         if self.peek() in ('+', '-') and self.peek_next() == 'i':
-            is_float = True  # Complex implies float
+            is_float = True
             self.advance()
-            self.advance()  # consume 'i'
+            self.advance()
             text = self.source[self.start:self.current]
             self.add_token(TokenType.LITERAL_COMPLEX, text)
             return
-        
         text = self.source[self.start:self.current]
         if is_float:
             self.add_token(TokenType.LITERAL_FLOAT, text, float(text))
         else:
             self.add_token(TokenType.LITERAL_INT, text, int(text))
-    
+
     def scan_string(self, quote: str):
         is_multiline = False
         start_pos = self.current - 1
-        
         if quote == "'" and self.match("''"):
             if self.match("'"):
                 is_multiline = True
@@ -576,8 +522,7 @@ class YadroLexer:
                 return
         elif quote == '"' and self.match('"'):
             if self.match('"'):
-                raise LexerError('Triple-double quotes forbidden: use \'\'\' for multiline', 
-                               self.line, self.column)
+                raise LexerError('Triple-double quotes forbidden: use \'\'\' for multiline', self.line, self.column)
         content_start = self.current
         while not self.is_at_end():
             if self.peek() == '\\':
@@ -587,7 +532,6 @@ class YadroLexer:
                     self.column = 1
                 self.advance()
                 continue
-            
             if is_multiline:
                 if self.match("'''"):
                     break
@@ -595,25 +539,23 @@ class YadroLexer:
                 if self.peek() == quote:
                     self.advance()
                     break
-            
             if self.peek() == '\n':
                 if not is_multiline:
                     raise LexerError("Unterminated string literal", self.line, self.column)
                 self.line += 1
                 self.column = 1
-            
             self.advance()
         else:
             raise LexerError("Unterminated string literal", self.line, self.column)
-        content_end = self.current - (6 if is_multiline else 1)
+        content_end = self.current - (3 if is_multiline else 1)
         value = self.source[content_start:content_end]
         full_lexeme = self.source[start_pos:self.current]
-        
         self.add_token(TokenType.LITERAL_STRING, full_lexeme, value)
-    # okay you see me
+
     def scan_line_comment(self):
         while self.peek() != '\n' and not self.is_at_end():
             self.advance()
+
     def scan_block_comment(self):
         depth = 1
         while depth > 0 and not self.is_at_end():
@@ -631,10 +573,9 @@ class YadroLexer:
                 self.advance()
             else:
                 self.advance()
-        
         if depth > 0:
             raise LexerError("Unterminated block comment", self.line, self.column)
-    
+
     def scan_indentation(self):
         spaces = 0
         while self.peek() == ' ':
@@ -642,7 +583,6 @@ class YadroLexer:
             spaces += 1
         if self.peek() == '\n' or self.is_at_end() or self.peek() == '#':
             return
-        
         prev_indent = self.indent_stack[-1]
         if spaces > prev_indent:
             self.indent_stack.append(spaces)
@@ -652,18 +592,16 @@ class YadroLexer:
                 self.indent_stack.pop()
                 self.add_token(TokenType.DEDENT)
             if self.indent_stack[-1] != spaces:
-                raise LexerError(
-                    f"Inconsistent indentation: expected {self.indent_stack[-1]} spaces, got {spaces}",
-                    self.line, self.column
-                )
+                raise LexerError(f"Inconsistent indentation: expected {self.indent_stack[-1]} spaces, got {spaces}", self.line, self.column)
+
     def is_at_end(self) -> bool:
         return self.current >= len(self.source)
-    
+
     def advance(self) -> str:
         self.current += 1
         self.column += 1
         return self.source[self.current - 1]
-    
+
     def match(self, expected: str) -> bool:
         if self.is_at_end():
             return False
@@ -672,31 +610,31 @@ class YadroLexer:
         self.current += len(expected)
         self.column += len(expected)
         return True
-    
+
     def peek(self) -> str:
         if self.is_at_end():
             return '\0'
         return self.source[self.current]
-    #if you read this ILY
+
     def peek_next(self) -> str:
         if self.current + 1 >= len(self.source):
             return '\0'
         return self.source[self.current + 1]
-    
+
     def peek_hex(self) -> bool:
         c = self.peek()
         return c.isdigit() or ('a' <= c.lower() <= 'f')
-    
+
     def peek_bin(self) -> bool:
         return self.peek() in ('0', '1')
-    
+
     def peek_oct(self) -> bool:
         c = self.peek()
         return '0' <= c <= '7'
-    
+
     def is_alphanumeric(self, c: str) -> bool:
         return c.isalnum() or c == '_'
-    
+
     def add_token(self, type: TokenType, lexeme: Optional[str] = None, value: Optional[Union[int, float, str]] = None):
         if lexeme is None:
             lexeme = self.source[self.start:self.current]
