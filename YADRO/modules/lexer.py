@@ -294,6 +294,7 @@ class YadroLexer:
             else:
                 self.current -= 1
                 self.column -= 1
+                self.start = self.current  # Ensure start points to # character
                 self.scan_directive()
             return
         elif c == '"' or c == "'":
@@ -405,7 +406,7 @@ class YadroLexer:
             if self.match('='):
                 self.add_token(TokenType.OP_ASSIGN_SWAP)
             else:
-                raise LexerError("'$' alone forbidden: use '$=' for swap only", self.line, self.column)
+                self.add_token(TokenType.OP_DEREF)
         elif c == '[':
             self.add_token(TokenType.LBRACKET)
         elif c == ']':
@@ -429,12 +430,13 @@ class YadroLexer:
             self.add_token(TokenType.LBRACE)
         elif c == '}':
             self.add_token(TokenType.RBRACE)
-        elif c == '#':
-            self.add_token(TokenType.OP_LENGTH)
         else:
             raise LexerError(f"Unexpected character: '{c}'", self.line, self.column)
 
     def scan_directive(self):
+        # Advance past the # character
+        self.advance()
+        # Scan alphabetic characters and underscores
         while self.peek().isalpha() or self.peek() == '_':
             self.advance()
         directive = self.source[self.start:self.current]

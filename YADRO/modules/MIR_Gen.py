@@ -14,7 +14,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import List, Optional, Union, Dict, Set, Tuple
-from parser import (
+from parserr import (
     Program, FunctionDecl, ClassDecl, BlockStmt, IfStmt, ReturnStmt,
     VariableDecl, AssignmentExpr, BinaryExpr, CallExpr, IdentifierExpr,
     LiteralExpr, PipelineExpr, ErrorPropagateExpr, DelStmt,
